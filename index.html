@@ -91,40 +91,6 @@
         .card, .line-section, .live-section, .shuttle-section { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: #333; display: block; font-weight: bold; box-sizing: border-box; }
         .owner-ig { background: #fff5f5; border: 2px solid #fd5d93; color: #fd5d93; }
         .owner-tiktok { background: #000000; color: #ffffff; border: 2px solid #25F4EE; }
-        
-        .toolbox-card { 
-            background: linear-gradient(135deg, #6e8efb, #a777e3); 
-            color: white; 
-            border: none; 
-            position: relative; 
-            overflow: hidden; 
-            animation: glowing 2s infinite;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .toolbox-card::after {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transform: rotate(30deg);
-            animation: shine 3s infinite;
-        }
-        @keyframes shine {
-            0% { left: -100%; }
-            20% { left: 100%; }
-            100% { left: 100%; }
-        }
-        @keyframes glowing {
-            0% { box-shadow: 0 0 5px #6e8efb; }
-            50% { box-shadow: 0 0 20px #a777e3; }
-            100% { box-shadow: 0 0 5px #6e8efb; }
-        }
 
         .shuttle-section { border: 2px solid #4A90E2; background: #f0f7ff; }
         .shuttle-title { color: #4A90E2; font-size: 18px; margin-bottom: 10px; display: block; }
@@ -266,9 +232,16 @@
     </div>
 
     <!-- 已更新匿名投稿連結 -->
-    <a href="https://tellonym.me/TW_CWH?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAdGRzdgSUjO9leHRuA2FlbQIxMQBzcnRjBmFwcF9pZA81NjcwNjczNDMzNTI0MjcAAacTcLisjCwqZFEtqotspojLf2pN6V2Bf7CHrXoooBA--132HXukbB4bpVscHA_aem_Y4ZAS85mJjcf_G8eunsQCQ" target="_blank" rel="noopener noreferrer" class="card" onclick="forceWeb(event)">🔗 匿名投稿連結 🔗</a>
+    <a href="https://tellonym.me/TW_lovemiss" target="_blank" rel="noopener noreferrer" class="card" onclick="forceWeb(event)">🔗 匿名投稿連結 🔗</a>
     
-    <a href="toolbox.html" target="_blank" class="card toolbox-card">🧰 萬用工具箱 </a>
+    <!-- 新增投稿文案表單按鈕 -->
+    <a href="https://forms.gle/queidkVdHbcqHS237" target="_blank" rel="noopener noreferrer" class="card">📝 投稿文案表單</a>
+
+    <!-- 將 倒數日 移到 投稿文案下面 -->
+    <a href="Countdown.html" target="_blank" class="card countdown-card">📅 倒數日系統 ⏳</a>
+
+    <!-- 將 天氣即時查詢系統 移到 倒數日下面 -->
+    <a href="weather.html" target="_blank" class="card weather-card">☀️ 天氣即時查詢系統 ☁️</a>
 
     <a href="https://www.dgpa.gov.tw/typh/daily/nds.html" target="_blank" class="card typhoon-card">🌀 停班課查詢</a>
 
@@ -278,10 +251,6 @@
         <a href="https://lin.ee/UvZBVCQ" target="_blank" style="color: #00b900; text-decoration: none; display: block; margin: 10px 0;">👉 點我加入好友 👈</a>
         <div class="line-id" onclick="copyID()">複製 ID: @128ivgwy</div>
     </div>
-
-    <a href="Countdown.html" target="_blank" class="card countdown-card">📅 倒數日系統 ⏳</a>
-
-    <a href="weather.html" target="_blank" class="card weather-card">☀️ 天氣即時查詢系統 ☁️</a>
     
     <div class="live-section">
         <strong style="display: block; margin-bottom: 15px; text-align: center;">🚨 地震即時直播專區</strong>
@@ -325,7 +294,7 @@
     }); }
 
     /* 已更新 forceWeb 內部的目標網址 */
-    function forceWeb(e) { e.preventDefault(); window.location.href = "https://tellonym.me/TW_CWH?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAdGRzdgSUjO9leHRuA2FlbQIxMQBzcnRjBmFwcF9pZA81NjcwNjczNDMzNTI0MjcAAacTcLisjCwqZFEtqotspojLf2pN6V2Bf7CHrXoooBA--132HXukbB4bpVscHA_aem_Y4ZAS85mJjcf_G8eunsQCQ"; }
+    function forceWeb(e) { e.preventDefault(); window.location.href = "https://tellonym.me/TW_lovemiss"; }
 
     // 新增：更新時鐘的時間更新函式
     function startLiveClock() {
