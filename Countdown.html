@@ -10,28 +10,35 @@
     <style>
         body {
             background-color: #a5d8e1;
+            /* 淺藍色背景 */
             font-family: 'Noto Sans TC', sans-serif;
             padding: 10px;
             padding-bottom: 70px;
+            /* 為底部固定文字留空間 */
             margin: 0;
             min-height: 100vh;
         }
+
         .main-title {
             color: #1a1a1a;
             font-size: clamp(1.5rem, 8vw, 2.5rem);
+            /* 自適應標題大小 */
             font-weight: 800;
             text-align: center;
             margin: 1.5rem 0;
             letter-spacing: 0.2rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            /* 自動填滿，最窄320px */
             gap: 1.5rem;
             max-width: 1200px;
             margin: 0 auto;
         }
+
         .card {
             background-color: #1a1a1a;
             border-radius: 1.5rem;
@@ -42,39 +49,49 @@
             flex-direction: column;
             justify-content: space-between;
         }
+
         .timer-box {
             border: 2px solid #eab308;
             border-radius: 0.75rem;
             flex: 1;
+            /* 讓方塊等寬 */
             aspect-ratio: 1 / 1.1;
+            /* 保持比例 */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             background: rgba(234, 179, 8, 0.05);
             min-width: 0;
+            /* 防止溢出 */
         }
+
         .timer-value {
             font-size: clamp(1.1rem, 4vw, 1.5rem);
             font-weight: 700;
             color: #eab308;
         }
+
         .timer-label {
             font-size: 0.7rem;
             color: #9ca3af;
             margin-top: 2px;
         }
+
         .progress-container {
             height: 10px;
             background-color: #333;
             border-radius: 5px;
             overflow: hidden;
         }
+
         .progress-bar {
             height: 100%;
             background: linear-gradient(90deg, #eab308 0%, #ca8a04 100%);
             transition: width 1s linear;
         }
+
+        /* 底部固定文字 */
         .footer-text {
             position: fixed;
             bottom: 0;
@@ -92,32 +109,32 @@
             z-index: 999;
             box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
         }
+
+        /* 手機版微調 */
         @media (max-width: 480px) {
-            .card { padding: 1.25rem; }
-            .cards-grid { grid-template-columns: 1fr; }
-            .footer-text { font-size: 0.7rem; padding: 8px 0; }
+            .card {
+                padding: 1.25rem;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+                /* 強制單欄 */
+            }
+            .footer-text {
+                font-size: 0.7rem;
+                padding: 8px 0;
+            }
         }
     </style>
 </head>
 <body>
 
     <h1 class="main-title">倒數系統</h1>
-    <div id="countdown-container" class="cards-grid"></div>
+
+    <div id="countdown-container" class="cards-grid">
+        <!-- 卡片會由 JS 動態生成 -->
+    </div>
 
     <script>
-        // 工具：取得「今年或明年」的指定日期 (MM-DD)
-        function getTargetDate(month, day) {
-            const now = new Date();
-            let year = now.getFullYear();
-            let target = new Date(year, month - 1, day);
-            // 如果今天已經過了這個日期 (且不是當天)，則改為明年
-            if (now > target) {
-                target = new Date(year + 1, month - 1, day);
-            }
-            return target;
-        }
-
-        // 發票開獎 (特殊規則，維持原本的計算)
         function getNextInvoiceDate() {
             const now = new Date();
             let year = now.getFullYear();
@@ -135,169 +152,96 @@
             return new Date(year, targetMonth - 1, 25, 14, 0, 0);
         }
 
-        // ---- 活動資料 ----
-        // 一般事件：直接給字串日期 (不會每年重複)
-        // 年度事件：使用 getTargetDate(month, day) 自動計算今年或明年
+        // 活動資料 — 已移除「10/10 版主生日」，並按需求新增節日
         const rawEvents = [
-            // 一般事件 (固定日期，不重複)
-            { title: "📄 載具發票開獎", targetDate: getNextInvoiceDate(), message: "祝您中大獎！ 💰", totalDays: 60, isAnnual: false },
-            { title: "📝 3/30~4/2 第一次段考", targetDate: "2026-03-30T00:00:00", message: "考試順利，加油！ 📖", totalDays: 30, isAnnual: false },
-            { title: "🕯️ 4/3~4/6 清明連假", targetDate: "2026-04-03T00:00:00", message: "慎終追遠，假期愉快 🌿", totalDays: 30, isAnnual: false },
-            { title: "🛠️ 4/12 在校生丙級檢定學科", targetDate: "2026-04-12T00:00:00", message: "證照拿起來！ 💪", totalDays: 20, isAnnual: false },
-            { title: "🎓 4/27~4/30 第二次段考(三年級)", targetDate: "2026-04-27T00:00:00", message: "高三同學最後衝刺！ 🔥", totalDays: 30, isAnnual: false },
-            { title: "🎤 5/5 才藝表演", targetDate: "2026-05-05T00:00:00", message: "展現你的才華吧！ ✨", totalDays: 20, isAnnual: false },
-            { title: "📚 5/11~5/15 第二次段考(一、二年級)", targetDate: "2026-05-11T00:00:00", message: "保持平常心應考 ✍️", totalDays: 30, isAnnual: false },
-            { title: "👩‍🎓 6/1 畢業日", targetDate: "2026-06-01T00:00:00", message: "畢業快樂，前程似錦 🎓", totalDays: 60, isAnnual: false },
-            { title: "🛶 6/19~6/21 端午連假", targetDate: "2026-06-19T00:00:00", message: "吃粽子、看龍舟 🛶", totalDays: 30, isAnnual: false },
-            { title: "📑 6/25~6/30 期末考", targetDate: "2026-06-25T00:00:00", message: "最後一戰，考完放暑假！ 🏖️", totalDays: 30, isAnnual: false },
-            { title: "☀️ 6/30 結業式", targetDate: "2026-06-30T00:00:00", message: "暑假快樂，迎接夏日時光！ 🌊", totalDays: 365, isAnnual: false },
-            { title: "📚 8/31 開學日", targetDate: "2026-08-31T00:00:00", message: "新學期新氣象，加油！ 💪", totalDays: 365, isAnnual: false },
-            { title: "🌕 9/25~9/28 中秋連假/教師節", targetDate: "2026-09-25T00:00:00", message: "中秋人團圓，假期愉快！ 🥮", totalDays: 365, isAnnual: false },
-            { title: "🇹🇼 10/9~10/11 國慶連假", targetDate: "2026-10-09T00:00:00", message: "國慶連假放鬆去！ 🎈", totalDays: 365, isAnnual: false },
-
-            // ---- 年度事件 (每年重複，時間到自動切換至明年) ----
-            { title: "👨 8/8 父親節", targetDate: getTargetDate(8, 8), message: "爸爸辛苦了，父親節快樂！ ❤️", totalDays: 365, isAnnual: true, month: 8, day: 8 },
-            { title: "🕯️ 8/27 中元節", targetDate: getTargetDate(8, 27), message: "普渡拜拜，平安順心 🙏", totalDays: 365, isAnnual: true, month: 8, day: 27 },
-            { title: "🎖️ 9/3 軍人節", targetDate: getTargetDate(9, 3), message: "感謝國軍弟兄，軍人節快樂！ 🇹🇼", totalDays: 365, isAnnual: true, month: 9, day: 3 },
-            { title: "🇹🇼 10/25 臺灣光復節", targetDate: getTargetDate(10, 25), message: "光復節快樂，緬懷歷史 🏛️", totalDays: 365, isAnnual: true, month: 10, day: 25 },
-            { title: "🇹🇼 10/26 臺灣光復節補假", targetDate: getTargetDate(10, 26), message: "光復節連假愉快 🎉", totalDays: 365, isAnnual: true, month: 10, day: 26 },
-            { title: "❄️ 12/22 冬至", targetDate: getTargetDate(12, 22), message: "冬至圓，吃湯圓團圓 🥣", totalDays: 365, isAnnual: true, month: 12, day: 22 },
-            { title: "📜 12/25 行憲紀念日", targetDate: getTargetDate(12, 25), message: "行憲紀念日快樂！ 🎄", totalDays: 365, isAnnual: true, month: 12, day: 25 },
-            { title: "🎆 1/1 元旦", targetDate: getTargetDate(1, 1), message: "新年快樂，全新開始！ ✨", totalDays: 365, isAnnual: true, month: 1, day: 1 },
-            // 新增：2/28 和平紀念日、5/1 勞動節
-            { title: "🕊️ 2/28 和平紀念日", targetDate: getTargetDate(2, 28), message: "和平紀念，珍惜當下 🌱", totalDays: 365, isAnnual: true, month: 2, day: 28 },
-            { title: "🔧 5/1 勞動節", targetDate: getTargetDate(5, 1), message: "勞工朋友辛苦了！ 💪", totalDays: 365, isAnnual: true, month: 5, day: 1 }
+            { title: "📄 載具發票開獎", targetDate: getNextInvoiceDate(), message: "祝您中大獎！ 💰", totalDays: 60 },
+            { title: "📝 3/30~4/2 第一次段考", targetDate: "2026-03-30T00:00:00", message: "考試順利，加油！ 📖", totalDays: 30 },
+            { title: "🕯️ 4/3~4/6 清明連假", targetDate: "2026-04-03T00:00:00", message: "慎終追遠，假期愉快 🌿", totalDays: 30 },
+            { title: "🛠️ 4/12 在校生丙級檢定學科", targetDate: "2026-04-12T00:00:00", message: "證照拿起來！ 💪", totalDays: 20 },
+            { title: "🎓 4/27~4/30 第二次段考(三年級)", targetDate: "2026-04-27T00:00:00", message: "高三同學最後衝刺！ 🔥", totalDays: 30 },
+            { title: "🎤 5/5 才藝表演", targetDate: "2026-05-05T00:00:00", message: "展現你的才華吧！ ✨", totalDays: 20 },
+            { title: "📚 5/11~5/15 第二次段考(一、二年級)", targetDate: "2026-05-11T00:00:00", message: "保持平常心應考 ✍️", totalDays: 30 },
+            { title: "👩‍🎓 6/1 畢業日", targetDate: "2026-06-01T00:00:00", message: "畢業快樂，前程似錦 🎓", totalDays: 60 },
+            { title: "🛶 6/19~6/21 端午連假", targetDate: "2026-06-19T00:00:00", message: "吃粽子、看龍舟 🛶", totalDays: 30 },
+            { title: "📑 6/25~6/30 期末考", targetDate: "2026-06-25T00:00:00", message: "最後一戰，考完放暑假！ 🏖️", totalDays: 30 },
+            { title: "☀️ 6/30 結業式", targetDate: "2026-06-30T00:00:00", message: "暑假快樂，迎接夏日時光！ 🌊", totalDays: 365 },
+            { title: "📚 8/31 開學日", targetDate: "2026-08-31T00:00:00", message: "新學期新氣象，加油！ 💪", totalDays: 365 },
+            // 新增節日 (按照指定日期)
+            { title: "👨 8/8 父親節", targetDate: "2026-08-08T00:00:00", message: "爸爸辛苦了，父親節快樂！ ❤️", totalDays: 365 },
+            { title: "🕯️ 8/27 中元節", targetDate: "2026-08-27T00:00:00", message: "普渡拜拜，平安順心 🙏", totalDays: 365 },
+            { title: "🎖️ 9/3 軍人節", targetDate: "2026-09-03T00:00:00", message: "感謝國軍弟兄，軍人節快樂！ 🇹🇼", totalDays: 365 },
+            { title: "🇹🇼 10/25 臺灣光復節", targetDate: "2026-10-25T00:00:00", message: "光復節快樂，緬懷歷史 🏛️", totalDays: 365 },
+            { title: "🇹🇼 10/26 臺灣光復節補假", targetDate: "2026-10-26T00:00:00", message: "光復節連假愉快 🎉", totalDays: 365 },
+            { title: "❄️ 12/22 冬至", targetDate: "2026-12-22T00:00:00", message: "冬至圓，吃湯圓團圓 🥣", totalDays: 365 },
+            { title: "📜 12/25 行憲紀念日", targetDate: "2026-12-25T00:00:00", message: "行憲紀念日快樂！ 🎄", totalDays: 365 },
+            // 以下保留原中秋/國慶連假（已移除版主生日，國慶連假保留）
+            { title: "🌕 9/25~9/28 中秋連假/教師節", targetDate: "2026-09-25T00:00:00", message: "中秋人團圓，假期愉快！ 🥮", totalDays: 365 },
+            { title: "🇹🇼 10/9~10/11 國慶連假", targetDate: "2026-10-09T00:00:00", message: "國慶連假放鬆去！ 🎈", totalDays: 365 },
+            { title: "🎆 1/1 元旦", targetDate: "2027-01-01T00:00:00", message: "新年快樂，全新開始！ ✨", totalDays: 365 }
         ];
 
-        // 更新倒數
         function updateCountdowns() {
             const container = document.getElementById('countdown-container');
             const now = new Date();
 
-            // 重新計算所有年度事件的 targetDate (確保時間到自動切換至明年)
-            const events = rawEvents.map(e => {
-                if (e.isAnnual && e.month && e.day) {
-                    // 重新計算年度日期
-                    let target = new Date(now.getFullYear(), e.month - 1, e.day);
-                    if (now > target) {
-                        target = new Date(now.getFullYear() + 1, e.month - 1, e.day);
-                    }
-                    return { ...e, targetDate: target };
-                }
-                // 非年度事件：若 targetDate 是字串則轉為 Date
-                if (typeof e.targetDate === 'string') {
-                    return { ...e, targetDate: new Date(e.targetDate) };
-                }
-                return { ...e, targetDate: new Date(e.targetDate) };
-            });
-
-            // 過濾掉已過期超過1天的事件 (顯示未來或今天)
-            const activeEvents = events
+            const activeEvents = rawEvents
                 .map(e => ({ ...e, target: new Date(e.targetDate) }))
                 .filter(e => (e.target - now) > -(1000 * 60 * 60 * 24))
                 .sort((a, b) => a.target - b.target);
 
-            // 重新渲染容器
+            // 僅在初始化或長度改變時重新渲染容器，避免每秒閃爍
             if (container.children.length !== activeEvents.length) {
                 container.innerHTML = activeEvents.map((_, i) => `<div id="event-card-${i}"></div>`).join('');
             }
 
             activeEvents.forEach((event, i) => {
                 const diff = event.target - now;
-                // 計算天數：若 diff < 0 表示是今天 (因為過濾條件已包含今天)
-                let days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                let displayDays = days;
-                let isToday = false;
-                let isTomorrow = false;
+                const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+                const hours = Math.max(0, Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+                const minutes = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
+                const seconds = Math.max(0, Math.floor((diff % (1000 * 60)) / 1000));
 
-                if (diff < 0 && diff > -86400000) {
-                    // 今天 (過濾條件允許 -1天內)
-                    isToday = true;
-                    displayDays = 0;
-                } else if (days === 0 && diff >= 0) {
-                    // 今天 (diff >=0 且 days=0)
-                    isToday = true;
-                    displayDays = 0;
-                } else if (days === 1) {
-                    // 明天
-                    isTomorrow = true;
-                }
-
-                // 若 diff < 0 但 days = -1 表示今天 (已過午夜但仍在24hr內)
-                if (diff < 0 && diff > -86400000) {
-                    isToday = true;
-                    displayDays = 0;
-                }
-
-                // 重新計算 hours/minutes/seconds (確保今天顯示正確)
-                let hours, minutes, seconds;
-                if (isToday) {
-                    // 顯示距離今天結束的時間 (或直接顯示0)
-                    const endOfDay = new Date(event.target);
-                    endOfDay.setHours(23, 59, 59, 999);
-                    const remaining = endOfDay - now;
-                    hours = Math.max(0, Math.floor(remaining / (1000 * 60 * 60)));
-                    minutes = Math.max(0, Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60)));
-                    seconds = Math.max(0, Math.floor((remaining % (1000 * 60)) / 1000));
-                } else {
-                    const absDiff = Math.abs(diff);
-                    hours = Math.floor((absDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
-                    seconds = Math.floor((absDiff % (1000 * 60)) / 1000);
-                }
-
-                // 決定顯示文字
-                let dayDisplay = displayDays;
-                let dayLabel = "天";
-                if (isToday) {
-                    dayDisplay = "就是今天";
-                    dayLabel = "";
-                } else if (isTomorrow) {
-                    dayDisplay = "就是明天";
-                    dayLabel = "";
-                } else {
-                    dayDisplay = Math.max(0, displayDays);
-                    dayLabel = "天";
-                }
-
-                // 進度條 (使用 totalDays)
-                const progressWidth = Math.max(0, Math.min(100, (1 - (Math.max(0, displayDays) / event.totalDays)) * 100));
+                const progressWidth = Math.max(0, Math.min(100, (1 - (days / event.totalDays)) * 100));
 
                 const cardElement = document.getElementById(`event-card-${i}`);
                 if (cardElement) {
                     cardElement.innerHTML = `
-                        <div class="card text-white h-full">
-                            <div class="text-center text-lg font-bold mb-4 min-h-[3rem] flex items-center justify-center">${event.title}</div>
-                            <div class="flex justify-between gap-2 mb-4">
-                                <div class="timer-box">
-                                    <span class="timer-value">${dayDisplay}</span>
-                                    <span class="timer-label">${dayLabel}</span>
+                                <div class="card text-white h-full">
+                                    <div class="text-center text-lg font-bold mb-4 min-h-[3rem] flex items-center justify-center">${event.title}</div>
+                                    
+                                    <div class="flex justify-between gap-2 mb-4">
+                                        <div class="timer-box">
+                                            <span class="timer-value">${days}</span>
+                                            <span class="timer-label">天</span>
+                                        </div>
+                                        <div class="timer-box">
+                                            <span class="timer-value">${hours}</span>
+                                            <span class="timer-label">時</span>
+                                        </div>
+                                        <div class="timer-box">
+                                            <span class="timer-value">${minutes}</span>
+                                            <span class="timer-label">分</span>
+                                        </div>
+                                        <div class="timer-box">
+                                            <span class="timer-value">${seconds}</span>
+                                            <span class="timer-label">秒</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-between text-[10px] text-gray-400 mb-1">
+                                        <span>進度 (${event.totalDays}天)</span>
+                                        <span>剩 ${days} 天</span>
+                                    </div>
+                                    
+                                    <div class="progress-container mb-4">
+                                        <div class="progress-bar" style="width: ${progressWidth}%"></div>
+                                    </div>
+
+                                    <div class="text-center italic text-yellow-400 text-xs">
+                                        ${event.message}
+                                    </div>
                                 </div>
-                                <div class="timer-box">
-                                    <span class="timer-value">${hours}</span>
-                                    <span class="timer-label">時</span>
-                                </div>
-                                <div class="timer-box">
-                                    <span class="timer-value">${minutes}</span>
-                                    <span class="timer-label">分</span>
-                                </div>
-                                <div class="timer-box">
-                                    <span class="timer-value">${seconds}</span>
-                                    <span class="timer-label">秒</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between text-[10px] text-gray-400 mb-1">
-                                <span>進度 (${event.totalDays}天)</span>
-                                <span>${isToday ? '今日活動' : isTomorrow ? '明日活動' : `剩 ${Math.max(0, displayDays)} 天`}</span>
-                            </div>
-                            <div class="progress-container mb-4">
-                                <div class="progress-bar" style="width: ${isToday ? 100 : progressWidth}%"></div>
-                            </div>
-                            <div class="text-center italic text-yellow-400 text-xs">
-                                ${event.message}
-                            </div>
-                        </div>
-                    `;
+                            `;
                 }
             });
 
@@ -310,6 +254,8 @@
         updateCountdowns();
     </script>
 
-    <div class="footer-text">©©匿名文案版製作</div>
+    <!-- 底部固定文字 — 已修改為「匿名文案｜版主小編團隊製作」 -->
+    <div class="footer-text">𝒍𝒐𝒗𝒆_𝒅𝒂𝒅𝒆𝒓情感語錄版製作</div>
+
 </body>
 </html>
