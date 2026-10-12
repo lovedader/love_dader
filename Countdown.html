@@ -1,261 +1,569 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>倒數系統</title>
-    <script src="https://cdn.tailwindcss.com">
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>倒數系統 · 公開頁面</title>
     <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif; margin: 0; padding: 0; }
+
+        :root {
+            --bg-start: #a8d5e5;
+            --bg-end: #cfe8f7;
+            --card-bg: #1c1c1c;
+            --card-border: #2e2e2e;
+            --accent: #f5b301;
+            --accent-glow: rgba(245, 179, 1, 0.5);
+            --text-light: #ffffff;
+            --text-muted: #bdbdbd;
+            --sync-green: #22c55e;
+        }
+
         body {
-            background-color: #a5d8e1;
-            /* 淺藍色背景 */
-            font-family: 'Noto Sans TC', sans-serif;
-            padding: 10px;
-            padding-bottom: 70px;
-            /* 為底部固定文字留空間 */
-            margin: 0;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
             min-height: 100vh;
+            padding: 2rem 1.5rem 7rem;
         }
 
-        .main-title {
-            color: #1a1a1a;
-            font-size: clamp(1.5rem, 8vw, 2.5rem);
-            /* 自適應標題大小 */
-            font-weight: 800;
-            text-align: center;
-            margin: 1.5rem 0;
-            letter-spacing: 0.2rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        .public-container { max-width: 1300px; margin: 0 auto; }
+
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 0.8rem;
         }
 
-        .cards-grid {
+        h1 {
+            font-size: 2rem; font-weight: 700; color: #0b2a3b;
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+
+        .sync-badge {
+            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.8rem; color: #1e5a3a; background: #c8ecd6;
+            padding: 0.35rem 1rem; border-radius: 30px;
+            font-weight: 600; border: 1px solid #8fd4a8;
+        }
+
+        .sync-dot {
+            width: 8px; height: 8px; background: #1e5a3a; border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        .offline-badge { background: #ffd6d6; color: #b33; border-color: #ffb0b0; }
+        .offline-badge .sync-dot { background: #b33; }
+
+        .countdown-list {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            /* 自動填滿，最窄320px */
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
             gap: 1.5rem;
-            max-width: 1200px;
-            margin: 0 auto;
         }
 
-        .card {
-            background-color: #1a1a1a;
+        .countdown-card {
+            background: var(--card-bg);
             border-radius: 1.5rem;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            padding: 1.8rem 1.8rem 1.5rem;
+            box-shadow: 0 12px 30px rgba(0, 20, 30, 0.25);
+            border: 1px solid var(--card-border);
+            display: flex; flex-direction: column; gap: 1.2rem;
+            transition: 0.25s;
         }
 
-        .timer-box {
-            border: 2px solid #eab308;
-            border-radius: 0.75rem;
-            flex: 1;
-            /* 讓方塊等寬 */
-            aspect-ratio: 1 / 1.1;
-            /* 保持比例 */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(234, 179, 8, 0.05);
-            min-width: 0;
-            /* 防止溢出 */
+        .countdown-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 20, 30, 0.35);
+            border-color: var(--accent);
         }
 
-        .timer-value {
-            font-size: clamp(1.1rem, 4vw, 1.5rem);
-            font-weight: 700;
-            color: #eab308;
+        .card-header {
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; flex-direction: column; gap: 0.3rem;
         }
 
-        .timer-label {
-            font-size: 0.7rem;
-            color: #9ca3af;
-            margin-top: 2px;
+        .event-name {
+            font-weight: 700; font-size: 1.15rem; color: var(--text-light);
+            letter-spacing: 0.5px; line-height: 1.4;
         }
 
-        .progress-container {
-            height: 10px;
-            background-color: #333;
-            border-radius: 5px;
-            overflow: hidden;
+        .event-phase {
+            font-size: 0.75rem; color: var(--accent);
+            font-weight: 600; letter-spacing: 0.5px;
+        }
+
+        .countdown-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem;
+        }
+
+        .time-box {
+            background: #141414; border: 2px solid var(--accent);
+            border-radius: 0.9rem; padding: 0.7rem 0.3rem 0.5rem;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 0.15rem;
+        }
+
+        .time-value {
+            font-size: 2rem; font-weight: 800; color: var(--accent);
+            line-height: 1; font-family: 'SF Mono', 'Fira Code', monospace;
+            letter-spacing: -1px;
+        }
+
+        .time-label {
+            font-size: 0.75rem; color: var(--text-muted);
+            font-weight: 500; letter-spacing: 1px;
+        }
+
+        .progress-section { display: flex; flex-direction: column; gap: 0.4rem; }
+
+        .progress-header {
+            display: flex; justify-content: space-between;
+            font-size: 0.78rem; color: var(--text-muted); font-weight: 500;
+        }
+
+        .progress-remaining { color: #e0e0e0; font-weight: 600; }
+
+        .progress-wrap {
+            width: 100%; height: 10px; background: #2e2e2e;
+            border-radius: 30px; overflow: hidden;
         }
 
         .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #eab308 0%, #ca8a04 100%);
-            transition: width 1s linear;
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--accent) 0%, #e8a800 100%);
+            border-radius: 30px; transition: width 0.6s ease;
+            box-shadow: 0 0 8px var(--accent-glow);
         }
 
-        /* 底部固定文字 */
-        .footer-text {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            padding: 10px 0;
-            background: rgba(26, 26, 26, 0.85);
-            backdrop-filter: blur(5px);
-            color: #eab308;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.1rem;
-            border-top: 1px solid rgba(234, 179, 8, 0.3);
-            z-index: 999;
-            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+        .card-message {
+            text-align: center; font-size: 0.85rem; color: #d4b96a;
+            font-weight: 500; letter-spacing: 0.5px;
+            line-height: 1.5; margin-top: 0.2rem;
         }
 
-        /* 手機版微調 */
-        @media (max-width: 480px) {
-            .card {
-                padding: 1.25rem;
+        .empty-state {
+            text-align: center; padding: 4rem 2rem; color: #0b2a3b;
+            background: rgba(255, 255, 255, 0.5); border-radius: 2rem;
+            font-size: 1.1rem; border: 2px dashed rgba(11, 42, 59, 0.2);
+            grid-column: 1 / -1;
+        }
+
+        .footer-note {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            text-align: center; padding: 0.9rem 1rem 0.8rem;
+            font-size: 1rem; color: #0b2a3b; letter-spacing: 0.5px;
+            font-weight: 600; background: rgba(168, 213, 229, 0.95);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(11, 42, 59, 0.1);
+            z-index: 100; line-height: 1.6;
+        }
+
+        .view-count {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            font-size: 0.85rem; color: #1e5a3a; background: #c8ecd6;
+            padding: 0.2rem 0.8rem; border-radius: 30px;
+            font-weight: 700; border: 1px solid #8fd4a8; margin-top: 0.3rem;
+        }
+
+        .green-light {
+            display: inline-block; width: 12px; height: 12px;
+            background: var(--sync-green); border-radius: 50%;
+            box-shadow: 0 0 6px var(--sync-green);
+            animation: breatheGlow 1.8s ease-in-out infinite;
+            margin-right: 6px; vertical-align: middle; position: relative; top: -1px;
+        }
+
+        @keyframes breatheGlow {
+            0%, 100% {
+                opacity: 1; transform: scale(1);
+                box-shadow: 0 0 6px var(--sync-green), 0 0 12px rgba(34, 197, 94, 0.6);
             }
-            .cards-grid {
-                grid-template-columns: 1fr;
-                /* 強制單欄 */
+            50% {
+                opacity: 0.45; transform: scale(1.35);
+                box-shadow: 0 0 14px var(--sync-green), 0 0 28px rgba(34, 197, 94, 0.9), 0 0 40px rgba(34, 197, 94, 0.5);
             }
-            .footer-text {
-                font-size: 0.7rem;
-                padding: 8px 0;
-            }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 1.2rem 1rem 6rem; }
+            h1 { font-size: 1.5rem; }
+            .countdown-list { grid-template-columns: 1fr; gap: 1rem; }
+            .countdown-card { padding: 1.4rem 1.2rem 1.2rem; }
+            .event-name { font-size: 1rem; }
+            .time-value { font-size: 1.6rem; }
+            .time-label { font-size: 0.7rem; }
+            .time-box { padding: 0.55rem 0.2rem 0.4rem; }
+            .card-message { font-size: 0.78rem; }
+            .footer-note { font-size: 0.85rem; padding: 0.7rem 0.8rem; }
+            .view-count { font-size: 0.75rem; }
+            .green-light { width: 10px; height: 10px; }
         }
     </style>
 </head>
 <body>
+    <div class="public-container">
+        <div class="header">
+            <h1>⏳ 倒數系統</h1>
+            <div id="syncBadge" class="sync-badge">
+                <span class="sync-dot"></span>
+                <span id="syncText">連線中…</span>
+            </div>
+        </div>
 
-    <h1 class="main-title">倒數系統</h1>
-
-    <div id="countdown-container" class="cards-grid">
-        <!-- 卡片會由 JS 動態生成 -->
+        <div id="publicCountdownList" class="countdown-list"></div>
     </div>
 
-    <script>
-        function getNextInvoiceDate() {
-            const now = new Date();
-            let year = now.getFullYear();
-            let month = now.getMonth() + 1;
-            let targetMonth;
-            if (month % 2 === 0) {
-                targetMonth = month + 1;
-            } else {
-                const drawTime = new Date(year, month - 1, 25, 14, 0, 0);
-                if (now > drawTime) targetMonth = month + 2;
-                else targetMonth = month;
-            }
-            if (targetMonth > 12) { targetMonth -= 12;
-                year += 1; }
-            return new Date(year, targetMonth - 1, 25, 14, 0, 0);
-        }
+    <div class="footer-note">
+        𝒍𝒐𝒗𝒆_𝒅𝒂𝒅𝒆𝒓情感語錄版製作
+        <br>
+        <span class="view-count">
+            <span class="green-light"></span>📊 總瀏覽次數：<span id="viewCount">載入中…</span>
+        </span>
+    </div>
 
-        // 活動資料 — 已移除「10/10 版主生日」，並按需求新增節日
-        const rawEvents = [
-            { title: "📄 載具發票開獎", targetDate: getNextInvoiceDate(), message: "祝您中大獎！ 💰", totalDays: 60 },
-            { title: "📝 3/30~4/2 第一次段考", targetDate: "2026-03-30T00:00:00", message: "考試順利，加油！ 📖", totalDays: 30 },
-            { title: "🕯️ 4/3~4/6 清明連假", targetDate: "2026-04-03T00:00:00", message: "慎終追遠，假期愉快 🌿", totalDays: 30 },
-            { title: "🛠️ 4/12 在校生丙級檢定學科", targetDate: "2026-04-12T00:00:00", message: "證照拿起來！ 💪", totalDays: 20 },
-            { title: "🎓 4/27~4/30 第二次段考(三年級)", targetDate: "2026-04-27T00:00:00", message: "高三同學最後衝刺！ 🔥", totalDays: 30 },
-            { title: "🎤 5/5 才藝表演", targetDate: "2026-05-05T00:00:00", message: "展現你的才華吧！ ✨", totalDays: 20 },
-            { title: "📚 5/11~5/15 第二次段考(一、二年級)", targetDate: "2026-05-11T00:00:00", message: "保持平常心應考 ✍️", totalDays: 30 },
-            { title: "👩‍🎓 6/1 畢業日", targetDate: "2026-06-01T00:00:00", message: "畢業快樂，前程似錦 🎓", totalDays: 60 },
-            { title: "🛶 6/19~6/21 端午連假", targetDate: "2026-06-19T00:00:00", message: "吃粽子、看龍舟 🛶", totalDays: 30 },
-            { title: "📑 6/25~6/30 期末考", targetDate: "2026-06-25T00:00:00", message: "最後一戰，考完放暑假！ 🏖️", totalDays: 30 },
-            { title: "☀️ 6/30 結業式", targetDate: "2026-06-30T00:00:00", message: "暑假快樂，迎接夏日時光！ 🌊", totalDays: 365 },
-            { title: "📚 8/31 開學日", targetDate: "2026-08-31T00:00:00", message: "新學期新氣象，加油！ 💪", totalDays: 365 },
-            // 新增節日 (按照指定日期)
-            { title: "👨 8/8 父親節", targetDate: "2026-08-08T00:00:00", message: "爸爸辛苦了，父親節快樂！ ❤️", totalDays: 365 },
-            { title: "🕯️ 8/27 中元節", targetDate: "2026-08-27T00:00:00", message: "普渡拜拜，平安順心 🙏", totalDays: 365 },
-            { title: "🎖️ 9/3 軍人節", targetDate: "2026-09-03T00:00:00", message: "感謝國軍弟兄，軍人節快樂！ 🇹🇼", totalDays: 365 },
-            { title: "🇹🇼 10/25 臺灣光復節", targetDate: "2026-10-25T00:00:00", message: "光復節快樂，緬懷歷史 🏛️", totalDays: 365 },
-            { title: "🇹🇼 10/26 臺灣光復節補假", targetDate: "2026-10-26T00:00:00", message: "光復節連假愉快 🎉", totalDays: 365 },
-            { title: "❄️ 12/22 冬至", targetDate: "2026-12-22T00:00:00", message: "冬至圓，吃湯圓團圓 🥣", totalDays: 365 },
-            { title: "📜 12/25 行憲紀念日", targetDate: "2026-12-25T00:00:00", message: "行憲紀念日快樂！ 🎄", totalDays: 365 },
-            // 以下保留原中秋/國慶連假（已移除版主生日，國慶連假保留）
-            { title: "🌕 9/25~9/28 中秋連假/教師節", targetDate: "2026-09-25T00:00:00", message: "中秋人團圓，假期愉快！ 🥮", totalDays: 365 },
-            { title: "🇹🇼 10/9~10/11 國慶連假", targetDate: "2026-10-09T00:00:00", message: "國慶連假放鬆去！ 🎈", totalDays: 365 },
-            { title: "🎆 1/1 元旦", targetDate: "2027-01-01T00:00:00", message: "新年快樂，全新開始！ ✨", totalDays: 365 }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue, runTransaction }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDl1FS2ZHCVK5WKUKT40WLrJW1g66i98RY",
+            authDomain: "today-b7115.firebaseapp.com",
+            databaseURL: "https://today-b7115-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "today-b7115",
+            storageBucket: "today-b7115.firebasestorage.app",
+            messagingSenderId: "920627202654",
+            appId: "1:920627202654:web:35decbb2b1148d2b2e82cf",
+            measurementId: "G-NPEW3N2Z3J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const eventsRef = ref(db, 'events');
+        const messagesRef = ref(db, 'messages');
+        const viewsRef = ref(db, 'total_views');
+
+        runTransaction(viewsRef, (current) => (current || 0) + 1).catch(err => console.error(err));
+
+        onValue(viewsRef, (snapshot) => {
+            const count = snapshot.val() || 0;
+            const el = document.getElementById('viewCount');
+            if (el) el.textContent = count.toLocaleString('zh-TW');
+        });
+
+        // 固定節日（永久輪迴）
+        const RECURRING_EVENTS = [
+            { id: 'rec_1', name: '01/01元旦', type: 'yearly', month: 1, day: 1, emoji: '🎆', defaultMessage: '新年快樂，全新開始！✨', progressDays: 365 },
+            { id: 'rec_2', name: '02/28和平紀念日', type: 'yearly', month: 2, day: 28, emoji: '🕊️', defaultMessage: '和平紀念日，珍惜自由', progressDays: 365 },
+            { id: 'rec_3', name: '10/10 國慶日', type: 'yearly', month: 10, day: 10, emoji: '🎉', defaultMessage: '國慶連假放鬆去！🎈', progressDays: 365 },
+            { id: 'rec_4', name: '10/10 版主生日', type: 'yearly', month: 10, day: 10, emoji: '🎂', defaultMessage: '生日快樂！Happy Birthday! 🎊', progressDays: 365 },
+            { id: 'rec_5', name: '載具發票開獎', type: 'oddMonths', day: 25, emoji: '🧾', defaultMessage: '祝您中大獎！💰', progressDays: 60 }
         ];
 
-        function updateCountdowns() {
-            const container = document.getElementById('countdown-container');
-            const now = new Date();
+        let adminEvents = [];
+        let customMessages = {};
 
-            const activeEvents = rawEvents
-                .map(e => ({ ...e, target: new Date(e.targetDate) }))
-                .filter(e => (e.target - now) > -(1000 * 60 * 60 * 24))
-                .sort((a, b) => a.target - b.target);
+        onValue(eventsRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            adminEvents = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+            setSyncStatus(true);
+            renderPublicList();
+        }, (error) => {
+            setSyncStatus(false);
+            console.error(error);
+        });
 
-            // 僅在初始化或長度改變時重新渲染容器，避免每秒閃爍
-            if (container.children.length !== activeEvents.length) {
-                container.innerHTML = activeEvents.map((_, i) => `<div id="event-card-${i}"></div>`).join('');
-            }
+        onValue(messagesRef, (snapshot) => {
+            customMessages = snapshot.val() || {};
+            renderPublicList();
+        });
 
-            activeEvents.forEach((event, i) => {
-                const diff = event.target - now;
-                const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
-                const hours = Math.max(0, Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-                const minutes = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
-                const seconds = Math.max(0, Math.floor((diff % (1000 * 60)) / 1000));
-
-                const progressWidth = Math.max(0, Math.min(100, (1 - (days / event.totalDays)) * 100));
-
-                const cardElement = document.getElementById(`event-card-${i}`);
-                if (cardElement) {
-                    cardElement.innerHTML = `
-                                <div class="card text-white h-full">
-                                    <div class="text-center text-lg font-bold mb-4 min-h-[3rem] flex items-center justify-center">${event.title}</div>
-                                    
-                                    <div class="flex justify-between gap-2 mb-4">
-                                        <div class="timer-box">
-                                            <span class="timer-value">${days}</span>
-                                            <span class="timer-label">天</span>
-                                        </div>
-                                        <div class="timer-box">
-                                            <span class="timer-value">${hours}</span>
-                                            <span class="timer-label">時</span>
-                                        </div>
-                                        <div class="timer-box">
-                                            <span class="timer-value">${minutes}</span>
-                                            <span class="timer-label">分</span>
-                                        </div>
-                                        <div class="timer-box">
-                                            <span class="timer-value">${seconds}</span>
-                                            <span class="timer-label">秒</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex justify-between text-[10px] text-gray-400 mb-1">
-                                        <span>進度 (${event.totalDays}天)</span>
-                                        <span>剩 ${days} 天</span>
-                                    </div>
-                                    
-                                    <div class="progress-container mb-4">
-                                        <div class="progress-bar" style="width: ${progressWidth}%"></div>
-                                    </div>
-
-                                    <div class="text-center italic text-yellow-400 text-xs">
-                                        ${event.message}
-                                    </div>
-                                </div>
-                            `;
-                }
-            });
-
-            if (activeEvents.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center text-gray-700 font-bold mt-10 text-xl">目前沒有活動</div>';
+        function setSyncStatus(online) {
+            const badge = document.getElementById('syncBadge');
+            const text = document.getElementById('syncText');
+            if (online) {
+                badge.className = 'sync-badge';
+                text.textContent = '即時同步中';
+            } else {
+                badge.className = 'sync-badge offline-badge';
+                text.textContent = '連線失敗';
             }
         }
 
-        setInterval(updateCountdowns, 1000);
-        updateCountdowns();
+        function getNextYearlyDate(month, day) {
+            const now = new Date();
+            const year = now.getFullYear();
+            let target = new Date(year, month - 1, day, 0, 0, 0);
+            if (target <= now) target = new Date(year + 1, month - 1, day, 0, 0, 0);
+            return target;
+        }
+
+        function getNextOddMonthDate(day) {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+            for (let offset = 0; offset < 12; offset++) {
+                let m = currentMonth + offset;
+                let y = currentYear;
+                while (m > 12) { m -= 12; y++; }
+                if (m % 2 === 0) continue;
+                const target = new Date(y, m - 1, day, 0, 0, 0);
+                if (target > now) return target;
+            }
+            return new Date(currentYear + 1, 0, day, 0, 0, 0);
+        }
+
+        function getNextRecurringDate(ev) {
+            if (ev.type === 'yearly') return getNextYearlyDate(ev.month, ev.day);
+            if (ev.type === 'oddMonths') return getNextOddMonthDate(ev.day);
+            if (ev.month && ev.day) return getNextYearlyDate(ev.month, ev.day);
+            return null;
+        }
+
+        function getFixedRecurringEvents() {
+            return RECURRING_EVENTS.map(ev => {
+                const target = getNextRecurringDate(ev);
+                if (!target) return null;
+                const y = target.getFullYear();
+                const m = String(target.getMonth() + 1).padStart(2, '0');
+                const d = String(target.getDate()).padStart(2, '0');
+                return { id: ev.id, name: ev.name, date: `${y}-${m}-${d}`, fixed: true, emoji: ev.emoji, progressDays: ev.progressDays, defaultMessage: ev.defaultMessage };
+            }).filter(Boolean);
+        }
+
+        function getAdminEventsWithDate() {
+            return adminEvents.map(ev => {
+                if (ev.type === 'yearly') {
+                    const target = getNextYearlyDate(ev.month, ev.day);
+                    const y = target.getFullYear();
+                    const m = String(target.getMonth() + 1).padStart(2, '0');
+                    const d = String(target.getDate()).padStart(2, '0');
+                    return { id: ev.id, name: ev.name, date: `${y}-${m}-${d}`, admin: true, yearly: true, emoji: ev.emoji || '', progressDays: ev.progressDays || 365, message: ev.message || '' };
+                } else {
+                    return { id: ev.id, name: ev.name, date: ev.date, endDate: ev.endDate || '', admin: true, yearly: false, emoji: ev.emoji || '', progressDays: ev.progressDays || 365, message: ev.message || '' };
+                }
+            });
+        }
+
+        function getEffectiveTargetDate(ev) {
+            const now = new Date();
+            if (!ev.endDate) return ev.date;
+            const startT = new Date(ev.date + 'T00:00:00');
+            const endT = new Date(ev.endDate + 'T00:00:00');
+            const endAfter = new Date(endT.getTime() + 86400000);
+            if (now < startT) return ev.date;
+            if (now < endAfter) return ev.endDate;
+            return ev.endDate;
+        }
+
+        function getEventPhase(ev) {
+            const now = new Date();
+            const startT = new Date(ev.date + 'T00:00:00');
+            if (!ev.endDate) return now < startT ? 'before' : 'after';
+            const endT = new Date(ev.endDate + 'T00:00:00');
+            const endAfter = new Date(endT.getTime() + 86400000);
+            if (now < startT) return 'before';
+            if (now < endAfter) return 'during';
+            return 'after';
+        }
+
+        function isEventActive(ev) {
+            const now = new Date();
+            if (ev.endDate) {
+                const endT = new Date(ev.endDate + 'T00:00:00');
+                const endAfter = new Date(endT.getTime() + 86400000);
+                return now < endAfter;
+            }
+            return !getCountdownParts(ev.date).isPast;
+        }
+
+        function getCountdownParts(dateStr) {
+            const now = new Date();
+            const target = new Date(dateStr + 'T00:00:00');
+            const diff = target - now;
+            if (diff <= 0) return { isPast: true };
+            const s = Math.floor(diff / 1000);
+            return {
+                isPast: false,
+                days: Math.floor(s / 86400),
+                hours: Math.floor((s % 86400) / 3600),
+                minutes: Math.floor((s % 3600) / 60),
+                seconds: s % 60,
+                totalSeconds: s
+            };
+        }
+
+        function getProgressPercent(totalSeconds, progressDays = 365) {
+            const FULL = progressDays * 86400;
+            let percent = ((FULL - totalSeconds) / FULL) * 100;
+            if (percent < 0) percent = 0;
+            if (percent > 100) percent = 100;
+            return percent;
+        }
+
+        function escapeHtml(s) {
+            if (s === undefined || s === null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        function pad2(n) { return String(n).padStart(2, '0'); }
+
+        function renderPublicList() {
+            const container = document.getElementById('publicCountdownList');
+            const fixed = getFixedRecurringEvents();
+            const admin = getAdminEventsWithDate();
+            const allEvents = [...fixed, ...admin];
+
+            const active = allEvents
+                .filter(ev => {
+                    if (!ev.date) return false;
+                    return isEventActive(ev);
+                })
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (!active.length) {
+                container.innerHTML = `<div class="empty-state">✨ 目前沒有進行中的倒數事件</div>`;
+                return;
+            }
+
+            container.innerHTML = active.map(ev => {
+                const targetStr = getEffectiveTargetDate(ev);
+                const p = getCountdownParts(targetStr);
+                const phase = getEventPhase(ev);
+                const progressDays = ev.progressDays || 365;
+                const percent = getProgressPercent(p.totalSeconds, progressDays);
+                const emoji = ev.emoji ? ev.emoji + ' ' : '';
+
+                let message = '';
+                if (ev.fixed) {
+                    const customMsg = customMessages[ev.id];
+                    message = (customMsg !== undefined && customMsg !== null && customMsg !== '')
+                        ? customMsg : (ev.defaultMessage || '');
+                } else if (ev.admin) {
+                    message = ev.message || '';
+                }
+
+                let phaseLabel = '';
+                if (ev.endDate) {
+                    if (phase === 'before') phaseLabel = `<div class="event-phase">🎯 倒數到活動開始日</div>`;
+                    else if (phase === 'during') phaseLabel = `<div class="event-phase">🎊 活動進行中 · 倒數到結束日</div>`;
+                }
+
+                return `
+                    <div class="countdown-card">
+                        <div class="card-header">
+                            <div class="event-name">${emoji}${escapeHtml(ev.name)}</div>
+                            ${phaseLabel}
+                        </div>
+                        <div class="countdown-grid">
+                            <div class="time-box"><div class="time-value" data-val="days" data-date="${ev.date}" data-end-date="${ev.endDate || ''}">${p.days}</div><div class="time-label">天</div></div>
+                            <div class="time-box"><div class="time-value" data-val="hours" data-date="${ev.date}" data-end-date="${ev.endDate || ''}">${pad2(p.hours)}</div><div class="time-label">時</div></div>
+                            <div class="time-box"><div class="time-value" data-val="minutes" data-date="${ev.date}" data-end-date="${ev.endDate || ''}">${pad2(p.minutes)}</div><div class="time-label">分</div></div>
+                            <div class="time-box"><div class="time-value" data-val="seconds" data-date="${ev.date}" data-end-date="${ev.endDate || ''}">${pad2(p.seconds)}</div><div class="time-label">秒</div></div>
+                        </div>
+                        <div class="progress-section">
+                            <div class="progress-header">
+                                <span>進度（${progressDays}天）</span>
+                                <span class="progress-remaining">剩 ${p.days} 天</span>
+                            </div>
+                            <div class="progress-wrap">
+                                <div class="progress-bar" data-bar-date="${ev.date}" data-end-date="${ev.endDate || ''}" style="width:${percent}%"></div>
+                            </div>
+                        </div>
+                        ${message ? `<div class="card-message">${escapeHtml(message)}</div>` : ''}
+                    </div>`;
+            }).join('');
+
+            startUpdater();
+        }
+
+        let interval = null;
+        function startUpdater() {
+            if (interval) clearInterval(interval);
+            interval = setInterval(() => {
+                let needRerender = false;
+                document.querySelectorAll('.time-value[data-date]').forEach(el => {
+                    const dateStr = el.getAttribute('data-date');
+                    const endDateStr = el.getAttribute('data-end-date') || '';
+                    if (!dateStr) return;
+
+                    let targetStr = dateStr;
+                    if (endDateStr) {
+                        const now = new Date();
+                        const startT = new Date(dateStr + 'T00:00:00');
+                        const endT = new Date(endDateStr + 'T00:00:00');
+                        const endAfter = new Date(endT.getTime() + 86400000);
+
+                        if (now < startT) {
+                            targetStr = dateStr;
+                        } else if (now < endAfter) {
+                            targetStr = endDateStr;
+                            const card = el.closest('.countdown-card');
+                            if (card) {
+                                const phaseEl = card.querySelector('.event-phase');
+                                if (phaseEl && phaseEl.textContent.includes('倒數到活動開始日')) {
+                                    needRerender = true;
+                                }
+                            }
+                        } else {
+                            needRerender = true;
+                            return;
+                        }
+                    }
+
+                    const p = getCountdownParts(targetStr);
+                    if (p.isPast) { needRerender = true; return; }
+
+                    const val = el.getAttribute('data-val');
+                    if (val === 'days') el.textContent = p.days;
+                    else if (val === 'hours') el.textContent = pad2(p.hours);
+                    else if (val === 'minutes') el.textContent = pad2(p.minutes);
+                    else if (val === 'seconds') el.textContent = pad2(p.seconds);
+
+                    const bar = document.querySelector(`.progress-bar[data-bar-date="${dateStr}"]`);
+                    if (bar) {
+                        const card = bar.closest('.countdown-card');
+
+                        let progressDays = 365;
+                        const fixedEv = RECURRING_EVENTS.find(r => {
+                            const target = getNextRecurringDate(r);
+                            if (!target) return false;
+                            const y = target.getFullYear();
+                            const m = String(target.getMonth() + 1).padStart(2, '0');
+                            const d = String(target.getDate()).padStart(2, '0');
+                            return `${y}-${m}-${d}` === dateStr;
+                        });
+                        if (fixedEv && fixedEv.progressDays) {
+                            progressDays = fixedEv.progressDays;
+                        } else {
+                            const adminEv = adminEvents.find(e => {
+                                if (e.type === 'yearly') {
+                                    const target = getNextYearlyDate(e.month, e.day);
+                                    const y = target.getFullYear();
+                                    const m = String(target.getMonth() + 1).padStart(2, '0');
+                                    const d = String(target.getDate()).padStart(2, '0');
+                                    return `${y}-${m}-${d}` === dateStr;
+                                } else {
+                                    return e.date === dateStr;
+                                }
+                            });
+                            if (adminEv && adminEv.progressDays) progressDays = adminEv.progressDays;
+                        }
+
+                        const percent = getProgressPercent(p.totalSeconds, progressDays);
+                        bar.style.width = percent + '%';
+
+                        if (card) {
+                            const remainEl = card.querySelector('.progress-remaining');
+                            if (remainEl) remainEl.textContent = `剩 ${p.days} 天`;
+                        }
+                    }
+                });
+                if (needRerender) renderPublicList();
+            }, 1000);
+        }
     </script>
-
-    <!-- 底部固定文字 — 已修改為「匿名文案｜版主小編團隊製作」 -->
-    <div class="footer-text">𝒍𝒐𝒗𝒆_𝒅𝒂𝒅𝒆𝒓情感語錄版製作</div>
-
 </body>
 </html>
